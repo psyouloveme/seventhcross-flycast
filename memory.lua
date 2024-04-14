@@ -29,11 +29,53 @@ function memory.read64(addr)
     return val
 end
 
+function memory.read32_dumb_str(addr)
+    local b1 = memory.util.tohexchar(memory.read8(addr))
+    local b2 = memory.util.tohexchar(memory.read8(addr+1))
+    local b3 = memory.util.tohexchar(memory.read8(addr+2))
+    local b4 = memory.util.tohexchar(memory.read8(addr+3))
+    return tonumber(b4..b3..b2..b1)
+end
+
+function memory.read32_dumb_str2(addr)
+    local b1 = memory.util.tohexchar(memory.read8(addr))
+    local b2 = memory.util.tohexchar(memory.read8(addr+1))
+    local b3 = memory.util.tohexchar(memory.read8(addr+2))
+    local b4 = memory.util.tohexchar(memory.read8(addr+3))
+    return memory.util.convertFloat(b4..b3..b2..b1)
+end
+
+function memory.read32_dumb_str3(addr)
+    local b1 = memory.util.tohexchar(memory.read8(addr))
+    local b2 = memory.util.tohexchar(memory.read8(addr+1))
+    local b3 = memory.util.tohexchar(memory.read8(addr+2))
+    local b4 = memory.util.tohexchar(memory.read8(addr+3))
+    return tonumber(b1..b2..b3..b4)
+end
+
+function memory.read32_dumb_str4(addr)
+    local b1 = memory.util.tohexchar(memory.read8(addr))
+    local b2 = memory.util.tohexchar(memory.read8(addr+1))
+    local b3 = memory.util.tohexchar(memory.read8(addr+2))
+    local b4 = memory.util.tohexchar(memory.read8(addr+3))
+    return memory.util.convertFloat(b1..b2..b3..b4)
+end
+
+function memory.read32_dumb_str5(addr)
+    local bs = memory.read32(addr)
+    -- print(string.format("about to repack %04x read at %08x", bs, addr))
+    local ss = string.pack("i4",bs)
+    local ff = string.unpack("f",ss)
+    return ff
+end
+
+
 function memory.readFloat32(addr)
     local raw_val = memory.read32(addr)
-    local string_val = string.format("%08x",raw_val)
-    local converted_val = memory.util.convertFloat(string_val)
-    return converted_val
+    return memory.util.fix_mem_float(raw_val)
+    -- local string_val = string.format("%08x",raw_val)
+    -- local converted_val = memory.util.convertFloat(string_val)
+    -- return converted_val
 end
 
 memory.util = {}
@@ -45,15 +87,25 @@ function memory.util.tohexstr(s)
     return string.format("%02x", s)
 end
 
-function memory.util.reverse_byte_order(bytes)
-    local temp_hex_string = string.format("%08x",bytes)
+function memory.util.fix_mem_float(raw_val)
+    local string_val = string.format("%04x",raw_val)
+    local converted_val = memory.util.convertFloat(string_val)
+    return converted_val
+end
+
+function memory.util.get_rbo_string(bytes)
+    local temp_hex_string = string.format("%04x",bytes)
     local temp_table = {}
     local final_string = ""
     for byte_str in string.gmatch(temp_hex_string, "[a-zA-Z0-9][a-zA-Z0-9]") do
         table.insert(temp_table, byte_str) end
     table.sort(temp_table, function(lef, rig) return lef < rig end)
     final_string = table.concat(temp_table)
-    return tonumber(final_string)
+    return final_string
+end
+
+function memory.util.reverse_byte_order(bytes)
+    return tonumber(memory.util.get_rbo_string(bytes))
 end
 
 -- http://lua-users.org/lists/lua-l/2010-03/msg00910.html

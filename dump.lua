@@ -1,9 +1,5 @@
+local consts = require "lua.seventhcross.constants"
 local dump = {}
-
-dump.DUMP_TYPE_NONE = 0
-dump.DUMP_TYPE_PLAYER = 1
-dump.DUMP_TYPE_MAIN = 2
-dump.DUMP_TYPE_ALL = 4
 
 function dump.dump_mem_region(start_offset, end_offset)
   local memfilename = "memdump-" .. os.date("%d%m%Y%H%M%S") .. "-" .. string.format("%x", start_offset) .. "-" .. string.format("%x", end_offset)  .. ".bin"
@@ -30,10 +26,10 @@ function dump.do_region_dump(start_offset, end_offset)
 end
 
 function dump.do_gui_dump(dump_type)
-  if dump_type == dump.DUMP_TYPE_PLAYER or dump_type == dump.DUMP_TYPE_ALL then
+  if dump_type == consts.dump_type.Player or dump_type == consts.dump_type.All then
     dump.do_region_dump(0x8c000000,0x8c010000)
     flycast.emulator.resume()
-  elseif dump_type == dump.DUMP_TYPE_MAIN or dump_type == dump.DUMP_TYPE_ALL then
+  elseif dump_type == consts.dump_type.Main or dump_type == consts.dump_type.All then
     dump.do_region_dump(0x8c1b1744, 0x8d000000)
     flycast.emulator.resume()
   end

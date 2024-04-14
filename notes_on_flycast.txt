@@ -1,0 +1,29 @@
+constexpr size_t operator""_KB(unsigned long long  x)
+{
+	return 1024 * x;
+}
+
+constexpr size_t operator""_MB(unsigned long long  x)
+{
+	return 1024 * 1024 * x;
+}
+
+constexpr size_t operator""_GB(unsigned long long  x)
+{
+	return 1024 * 1024 * 1024 * x;
+}
+
+case DC_PLATFORM_DREAMCAST:
+	settings.platform.ram_size = config::RamMod32MB ? 32_MB : 16_MB;
+	settings.platform.vram_size = 8_MB;
+	settings.platform.aram_size = 2_MB;
+	settings.platform.bios_size = 2_MB;
+	settings.platform.flash_size = 128_KB;
+	break;
+
+
+
+#define MAP_RAM_START_OFFSET  0                                       = 0
+#define MAP_VRAM_START_OFFSET (MAP_RAM_START_OFFSET+RAM_SIZE)         = 0 + 1024 * 1024 * 16       = 16777216 = 0x1000000
+#define MAP_ARAM_START_OFFSET (MAP_VRAM_START_OFFSET+VRAM_SIZE)       = 16777216 + 1024 * 1024 * 8 =           =0x1800000
+#define MAP_ERAM_START_OFFSET (MAP_ARAM_START_OFFSET+ARAM_SIZE)       =                                           1A00000
