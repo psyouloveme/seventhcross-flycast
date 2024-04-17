@@ -27,10 +27,13 @@ end
 
 function dump.do_gui_dump(dump_type)
   if dump_type == consts.dump_type.Player or dump_type == consts.dump_type.All then
-    dump.do_region_dump(0x8c000000,0x8c010000)
+    dump.do_region_dump(consts.ranges.PlayerStruct.Start,consts.ranges.PlayerStruct.End)
     flycast.emulator.resume()
   elseif dump_type == consts.dump_type.Main or dump_type == consts.dump_type.All then
-    dump.do_region_dump(0x8c1b1744, 0x8d000000)
+    dump.do_region_dump(consts.ranges.MainMemory.Start, consts.ranges.MainMemory.End)
+    flycast.emulator.resume()
+  elseif dump_type == consts.dump_type.MainGrid or dump_type == consts.dump_type.All then
+    dump.do_region_dump(consts.ranges.MainGrid.Start, consts.ranges.MainGrid.End)
     flycast.emulator.resume()
   end
 end

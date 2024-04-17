@@ -25,6 +25,11 @@ local function calculate_score(coord, coords)
     local score = 0
     -- local grid = sg.read_inner_grid(x, y)
     local coord = grid.idx_to_coord(index)
+    for y = 0, #grid do
+        for x = 0, #grid[y] do
+            
+        end
+    end
     for i = 0, 100 do
         if is_index_in_list(i, coords) then
             local w = 1.0 - memory.readFloat32(grid_ptr_cpy + (i*4))
@@ -48,57 +53,111 @@ end
 
 -- search_idx - supergrid index
 -- now a coord pair
-local function find_simplest(coord, attempts)
-    print(string.format("Search for Super Grid: (%d, %d)", coord.x, coord.y))
+local function find_simplest(search_idx, attempts)
+    -- std::cout << "Searching for sg idx: " << search_idx << "\n";
+    print(string.format("Search for sg idx: %d", search_idx))
+
+    -- std::vector<int> pattern;
     local pattern = {}
+    -- bool found = false;
     local found = false
 
     -- while(found == false && pattern.size() < attempts) {
     while found == false and #pattern < attempts do
         print(string.format("Attempt %d", #pattern))
 
+        -- int best_diff_idx = 0;
         local best_diff_idx = 0
+
+        -- float best_diff_amount = 400.f;
         local best_diff_amount = 400.0
 
+
         -- loop over testing a dot
-        for draw_grid_idx = 0, 99 do
-            table.insert(pattern, draw_grid_idx)
-            local search_score = calculate_score(coord.index, pattern)
+        -- for(int i = 0; i < 100; i++) { // loop over testing a dot
+        -- for i = 0, 100 do
+        for i = 0, 2 do
+
+            -- pattern.push_back(i);
+            table.insert(pattern, i)
+
+            -- float search_score = calculate_score(search_idx, pattern);
+            local search_score = calculate_score(coord, pattern)
+
+            -- int best_idx = 0;
             local best_idx = 0
+
+            -- float best_score = 400.f;
             local best_score = 400.0
 
+
             -- loop over checking a supergrid idx
-            for supergrid_index = 0, 399, 1 do
-                if supergrid_index ~= coord.index then
-                    local score = calculate_score(supergrid_index, pattern)
+            -- for(int j = 0; j < 400; j++) { // loop over checking a supergrid idx
+            -- for j = 0, 399, 1 do
+            for j = 0, 2, 1 do
+                -- print('j=',j)
+
+                -- if(j != search_idx) {
+                if j ~= search_idx then
+
+                    -- float score = calculate_score(j, pattern);
+                    local score = calculate_score(j, pattern)
+
+                    -- if(score < best_score) {
                     if score < best_score then
-                        best_idx = supergrid_index
+
+                        -- best_idx = j;
+                        best_idx = j
+
+                        -- best_score = score;
                         best_score = score
                     end
                 end
             end
 
+            -- if(search_score < best_score) {
             if search_score < best_score then
+
+                -- found = true;
                 found = true
-                local coord_str = "Found:"
-                for pat_list_idx, pat_grid_index in pairs(pattern) do
-                    grid.idx_to_coord(pat_grid_index)
-                    local x = (pat_grid_index % 10) + 1
-                    local y = math.floor(pat_grid_index / 10) + 1
-                    coord_str = coord_str..string.format("  (%d, %d)", x, y)
+
+                -- std::cout << "Found: ";
+                print("Found: ")
+                
+                -- for(int j = 0; j < pattern.size(); j++) {
+                    -- for i, val in ipairs(pattern) do
+                for it = 0, #pattern do
+
+                    -- int p = pattern.at(j);
+                    local p = pattern[it]
+
+                    -- int x = (p % 10) + 1;
+                    local x = (p % 10) + 1
+
+                    -- int y = (p / 10) + 1;
+                    local y = (p / 10) + 1
+
+                    -- std::cout << "(" << x << ", " << y << ") ";
+                    print(string.format("(%d, %d)", x, y))
                 end
-                print(coord_str)
             end
 
+            -- if((search_score - best_score) < best_diff_amount) {
             if (search_score - best_score) < best_diff_amount then
-                best_diff_idx = draw_grid_idx
+
+                -- best_diff_idx = i;
+                best_diff_idx = i
+
+                -- best_diff_amount = search_score - best_score;
                 best_diff_amount = search_score - best_score
             end
+
+            -- pattern.pop_back();
             table.remove(pattern)
         end
+        -- pattern.push_back(best_diff_idx);
         table.insert(pattern, best_diff_idx)
-        local c = grid.idx_to_coord(best_diff_idx)
-        print(string.format("Attempt %d result: (%d, %d) [%d] : %.09f", #pattern, c.x, c.y, best_diff_idx, best_diff_amount))
+        print(string.format("Attempt %d result: %d : %.09f", #pattern, best_diff_idx, best_diff_amount))
     end
 end
 
@@ -117,7 +176,7 @@ local function get_part_level(index)
 end
 
 local function find_part(part_type, part_level, attempts)
-    print(string.format("Find part: type: %d level: %d attempts: %d", part_type, part_level, attempts))
+    -- print(string.format("Find part: type: %d level: %d attempts: %d", part_type, part_level, attempts))
     local candidates = {}
     local y_min = 0 + ((part_type >> 1) * 10)
     local y_max = 10 + ((part_type >> 1) * 10)
@@ -129,29 +188,19 @@ local function find_part(part_type, part_level, attempts)
         for x = x_min, x_max - 1, 1 do
             local lvl = part_grid[x][y]
             if (lvl == part_level) then
-                -- local coord = supergrid.idx_to_coord(idx)
-                local point = {
-                    index = supergrid.coord_to_idx(x,y);
-                    x = x;
-                    y = y;
-                }
-                table.insert(candidates, point)
+                local idx = supergrid.coord_to_idx(x,y)
+                local coord = supergrid.idx_to_coord(idx)
+                table.insert(candidates, {x = x, y = y})
                 -- print(string.format("%d %d %d ?= %d %d %d", x, y, idx, idx, coord.x, coord.y))
-                print(string.format("Candidate: index: %d at supergrid (%d,%d)", point.index, point.x, point.y))
+                print(string.format("Candidate: index: %d at supergrid (%d,%d)", supergrid.coord_to_idx(x,y), x, y))
             end
         end
     end
-    for key, value in pairs(candidates) do
-        print("trying to find simplest", key, value, attempts)
-        find_simplest(value, attempts)
-
-        -- print("key ", key)
-        -- print("value", value)
-    end
     -- print(string.format("candidates: %s, length: %d", table_to_string(candidates), #candidates))
-    -- for it = 0, #candidates do
-        -- find_simplest(candidates[it], attempts)
-    -- end
+    for it = 0, #candidates do
+        print("trying to find simplest", candidates[it], attempts)
+        find_simplest(candidates[it], attempts)
+    end
 end
 
 

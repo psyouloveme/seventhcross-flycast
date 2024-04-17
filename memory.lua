@@ -61,7 +61,7 @@ function memory.read32_dumb_str4(addr)
     return memory.util.convertFloat(b1..b2..b3..b4)
 end
 
-function memory.read32_dumb_str5(addr)
+function memory.readFloat32(addr)
     local bs = memory.read32(addr)
     -- print(string.format("about to repack %04x read at %08x", bs, addr))
     local ss = string.pack("i4",bs)
@@ -70,7 +70,7 @@ function memory.read32_dumb_str5(addr)
 end
 
 
-function memory.readFloat32(addr)
+function memory.readFloat32_old(addr)
     local raw_val = memory.read32(addr)
     return memory.util.fix_mem_float(raw_val)
     -- local string_val = string.format("%08x",raw_val)

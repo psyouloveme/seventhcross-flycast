@@ -4,11 +4,6 @@ local SUPER_GRID_DEF = 0x8c0c72b4
 
 local calc = {}
 
-calc.PART_TYPE_HEAD = 0
-calc.PART_TYPE_BODY = 1
-calc.PART_TYPE_ARM  = 2
-calc.PART_TYPE_LEG  = 3
-
 local function table_to_string(tab)
     return tostring(table.unpack(tab))
 end
@@ -19,14 +14,14 @@ function calc.calculate_score(index, coords)
     local score = 0
     for i = 0, 100, 1 do
         if calc.is_index_in_list(i, coords) then
-            local w = 1.0 - memory.read32_dumb_str5(grid_ptr_cpy + (i*4))
+            local w = 1.0 - memory.readFloat32(grid_ptr_cpy + (i*4))
             local wd = w
             wd = wd * wd
             local scored = score
             scored = scored + wd
             score = scored
         else
-            local w = memory.read32_dumb_str5(grid_ptr_cpy + (i*4))
+            local w = memory.readFloat32(grid_ptr_cpy + (i*4))
             local wd = w
             wd = wd * wd
             local scored = score

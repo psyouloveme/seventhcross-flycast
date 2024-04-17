@@ -1,11 +1,13 @@
 require "string"
 local dump = require "lua.seventhcross.dump"
 local consts = require "lua.seventhcross.constants"
+local maingrind_window = require "lua.seventhcross.windows.maingrid"
 local build_supergrid_window = require "lua.seventhcross.windows.supergrid"
 local build_evp_window = require "lua.seventhcross.windows.evp"
+local calc_window = require "lua.seventhcross.windows.calc"
 
 NEXT_PAUSE_DUMP_TYPE = consts.dump_type.None
-local f = 0
+-- local f = 0
 
 local function cbPause()
   if NEXT_PAUSE_DUMP_TYPE ~= consts.dump_type.None then
@@ -33,10 +35,13 @@ local function cbResume()
 end
 
 local function cbOverlay()
-  f = f + 1
-  build_evp_window()
+  -- f = f + 1
+  -- build_evp_window()
   -- build_stat_window()
   build_supergrid_window()
+  -- maingrind_window.build_grid_controls_window()
+  -- maingrind_window.build_grid_viewer()
+  calc_window.build_calc_window()
   -- build_supergrid_window()
   -- build_maingrid_window()
   -- build_grid_controls()
