@@ -1,4 +1,5 @@
 local consts = require("lua.seventhcross.constants")
+local memory = require("lua.seventhcross.memory")
 
 local grid = {
     height = 200;
@@ -57,6 +58,26 @@ function grid.offset_to_coord(offset)
     coord.x = math.floor((offset - grid.start_address) / grid.value_size) % grid.width
     coord.y = math.floor(((offset - grid.start_address) / grid.value_size) / grid.width)
     return coord
+end
+
+function grid.read_coord(x,y)
+    return memory.readFloat32(grid.coord_to_offset(x,y))
+end
+
+function grid.read_subgrid_by_coord(x,y)
+    local g = {}
+    for k = 0, grid.subgrid_width - 1 do
+        for j = 0, grid.subgrid_width - 1 do
+            if g[j] == nil then
+                g[j] = {}
+            end
+            if g[j][k] == nil then
+                g[j][k] = {}
+            end
+            g[j][k] = grid.read_coord(x,y)
+        end
+    end
+    return g
 end
 
 function grid.run_conversions(x, y, index, offset)

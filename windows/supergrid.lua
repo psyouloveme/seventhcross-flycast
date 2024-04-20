@@ -8,6 +8,7 @@ local part_grids = {
   body = nil,
   leg = nil
 }
+
 function part_grids.get(part_type)
   if part_type == constants.parts.HEAD then return part_grids.head end
   if part_type == constants.parts.ARM then return part_grids.arm end
@@ -25,11 +26,13 @@ end
 
 local part_grid_x_offset = 350
 local part_grid_y_offset = 260
+local part_gridx_x = 0
+local part_grids_y = 260
 function part_grids.get_window_pos(part_type)
-  if part_type == constants.parts.HEAD then return { x = 0, y = 0} end
-  if part_type == constants.parts.BODY then return { x = part_grid_x_offset, y = 0} end
-  if part_type == constants.parts.ARM then return { x = 0, y = part_grid_y_offset} end
-  if part_type == constants.parts.LEG then return { x = part_grid_x_offset, y = part_grid_y_offset} end
+  if part_type == constants.parts.HEAD then return { x = part_gridx_x, y = part_grids_y} end
+  if part_type == constants.parts.BODY then return { x = part_gridx_x + part_grid_x_offset, y = part_grids_y} end
+  if part_type == constants.parts.ARM then return { x = part_gridx_x, y = part_grids_y + part_grid_y_offset} end
+  if part_type == constants.parts.LEG then return { x = part_gridx_x + part_grid_x_offset, y = part_grids_y + part_grid_y_offset} end
   return nil
 end
 

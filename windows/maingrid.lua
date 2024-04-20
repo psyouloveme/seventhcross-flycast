@@ -1,3 +1,4 @@
+local maingrid = require "lua.seventhcross.maingrid"
 local grid = require "lua.seventhcross.grid"
 local exports = {}
 local maingrid_coord = { x = 1, y = 1}
@@ -87,7 +88,7 @@ function exports.build_grid_controls_window()
   function exports.build_grid_viewer()
     if ((last_render_og_x ~= render_og_x) or (last_render_og_y ~= render_og_y)) then
       print(string.format("Updating rendered grid to %d %d", og_x, og_y))
-      local ig = grid.read_inner_grid(render_og_x, render_og_y)
+      local ig = maingrid.read_subgrid_by_coord(render_og_x, render_og_y)
       render_ig_str = grid.print_grid(ig)
       last_render_og_x = render_og_x
       last_render_og_y = render_og_y
