@@ -1,8 +1,5 @@
 local maingrid = require "lua.seventhcross.maingrid"
-local grid = require "lua.seventhcross.grid"
 local exports = {}
-local maingrid_coord = { x = 1, y = 1}
-local maingrid_matrix_test = nil
 
 -- x coord being set in controls
 local og_x = 0
@@ -55,15 +52,9 @@ local function step_grid_y(direction)
   render_og_y = og_y
 end
 
-
-function exports.build_maingrid_window()
-    flycast.ui.beginWindow(string.format("Main Grid (%d, %d)", maingrid_coord.x, maingrid_coord.y), 800, 10, 455, 560)
-    flycast.ui.endWindow()
-end
-
 function exports.build_grid_controls_window()
     local ui = flycast.ui
-    ui.beginWindow("Move", 1065, 0, 100, 0)
+    ui.beginWindow("Move", 1065, 200, 100, 0)
     -- ui.text("Viewing")
     -- ui.text(string.format("(%d,%d)", og_x, og_y))
     ui.button("-x", function()
@@ -88,8 +79,8 @@ function exports.build_grid_controls_window()
   function exports.build_grid_viewer()
     if ((last_render_og_x ~= render_og_x) or (last_render_og_y ~= render_og_y)) then
       print(string.format("Updating rendered grid to %d %d", og_x, og_y))
-      local ig = maingrid.read_subgrid_by_coord(render_og_x, render_og_y)
-      render_ig_str = grid.print_grid(ig)
+      local ig = maingrid.sub.read_by_super_coord_transposed(render_og_x, render_og_y)
+      render_ig_str = maingrid.to_string(ig)
       last_render_og_x = render_og_x
       last_render_og_y = render_og_y
     end

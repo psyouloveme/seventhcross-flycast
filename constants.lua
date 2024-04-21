@@ -52,6 +52,26 @@ local constants = {
         LEG = 3
     }
 }
+constants.grid = {
+    main = {
+        height = 200;
+        width = 200;
+        value_size = constants.sizeof.float;
+        start_address = constants.addrs.MainGrid;
+    };
+    super = {
+        height = 20;
+        width = 20;
+        value_size = constants.sizeof.byte;
+        start_address = constants.addrs.SuperGrid;
+    };
+    sub = {
+        height = 10;
+        width = 10;
+        value_size = constants.sizeof.float;
+        start_address = constants.addrs.MainGrid;
+    };
+}
 
 function constants.get_part_string(part_type)
     if part_type == constants.parts.HEAD then return "HEAD" end
