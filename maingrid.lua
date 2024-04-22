@@ -70,6 +70,10 @@ local grid = {
             ---@param y integer main grid matrix representation y coordinate
             ---@return integer offset memory offset of the value corresponding to (x,y)
             to_offset = function(x, y)
+                local idx = (y * consts.grid.main.width) + x
+                local size_idx = idx * consts.grid.main.value_size
+                local ad = size_idx + consts.grid.main.start_address
+                print(string.format("coord.to_offset - %d %d 0x%08x", idx, size_idx, ad))
                 return (((y * consts.grid.main.width) + x) * consts.grid.main.value_size) + consts.grid.main.start_address
             end;
 
@@ -127,8 +131,19 @@ local grid = {
             ---@param x integer x coordinate of the matrix representation of the super-grid to translate.
             ---@param y integer y coordinate of the matrix representation of the super-grid to translate.
             ---@return integer index index of the first value of the sub-grid indicated by the super-grid coordinate in the array representation of the main grid.
+            to_main_offset = function(x, y)
+                return (((y * consts.grid.sub.width * consts.grid.main.width) + (x * consts.grid.sub.width * consts.grid.sub.height)) * consts.grid.main.value_size) + consts.grid.main.start_address
+            end;
+
+            ---Translate a super-grid coordinate into the index of the first element of the array representation of the main grid.
+            ---@param x integer x coordinate of the matrix representation of the super-grid to translate.
+            ---@param y integer y coordinate of the matrix representation of the super-grid to translate.
+            ---@return integer index index of the first value of the sub-grid indicated by the super-grid coordinate in the array representation of the main grid.
             to_main_index = function(x, y)
-                return (y * consts.grid.sub.width * consts.grid.main.width) + (x * consts.grid.sub.width)
+                local xpart = (x * consts.grid.sub.width)
+                local ypart = (y * consts.grid.sub.width * consts.grid.main.width)
+                print(string.format("%d %d -> ypart: %d  xpart: %d", x, y, ypart, xpart))
+                return (y * consts.grid.sub.width * consts.grid.main.width) + (x * consts.grid.sub.width * consts.grid.sub.height)
             end;
 
             ---Translate a super-grid coordinate into main grid matrix coordinate that corresponds to (0,0) of the corresponding sub-grid pointed to by (x,y).
@@ -168,6 +183,10 @@ local grid = {
             ---@return integer index coordinate (x,y) translated to an index into the array representation of the sub-grid that contains this coordinate.
             to_index = function(x, y)
                 return (y * consts.grid.sub.width) + x
+            end;
+
+            to_offset = function(x, y)
+                return ((y * consts.grid.sub.width) + x) * consts.grid.main.value_size
             end;
         };
     };
@@ -215,14 +234,8 @@ end
 ---@param y2 integer sub-grid matrix representation y coordinate
 ---@return number value the float value stored in game memory that corresponds to (x1,y1,x2,y2)
 function grid.main.read_value_by_super_sub_coord(x1, y1, x2, y2)
-    local x = (x1 * consts.grid.sub.width) + x2
-    local y = (y1 * consts.grid.sub.height) + y2
-    local offset = grid.main.coord.to_offset(x,y)
-    local c = grid.main.offset.to_coord(offset)
-    local i = grid.main.offset.to_index(offset)
-    local val = memory.readFloat32(offset);
-    print(string.format("(%d, %d, %d, %d) -> (%d, %d) -> 0x%08x -> (%d, %d) -> %d -> %.09f", x1, y1, x2, y2, x, y, offset, c.x, c.y, i, val))
-    -- print(string.format("(%d, %d) -> 0x%08x", x, y, offset2))
+    local mgo = grid.super.coord.to_main_offset(x1, y1) + grid.sub.coord.to_offset(x2, y2)
+    local val = memory.readFloat32(mgo);
     return val;
 end
 
@@ -231,6 +244,7 @@ end
 ---@param y integer super-grid matrix representation y coordinate.
 ---@return number[][] subgrid a 10x10 matrix of floats that correspond the super-grid coordinate (x,y).
 function grid.sub.read_by_super_coord(x,y)
+    local mgc = grid.super.coord.to_main_offset(x, y)
     local g = {}
     for k = 0, consts.grid.sub.width - 1 do
         for j = 0, consts.grid.sub.width - 1 do

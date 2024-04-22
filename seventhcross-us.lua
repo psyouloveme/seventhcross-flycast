@@ -41,7 +41,7 @@ local windows_enabled = {
   stats = false,
   maingrid = true,
   supergrid = true,
-  calc = false
+  calc = true
 }
 
 local function build_toggle(name, uiname)
