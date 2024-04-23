@@ -181,4 +181,34 @@ function memory.util.convertFloat(x)
     return math.ldexp(mantissa, exponent - 127)
 end
 
+memory.tests = {}
+
+function memory.tests.try_float_print_formats(fl, label)
+    if fl == nil then
+      print(string.format("%s is nil", label))
+    else
+      print(string.format("%s: print: ", label), fl)
+      print(string.format("%s: tostring: ", label), tostring(fl))
+      print(string.format("%s: strf: %f", label, fl))
+    end
+  end
+  
+function memory.tests.try_float_formats(addr, label)
+    local m1 = memory.read32(addr)
+    local m2 = memory.readFloat32_old(addr)
+    local m3 = memory.read32_dumb_str(addr)
+    local m4 = memory.read32_dumb_str2(addr)
+    local m5 = memory.read32_dumb_str3(addr)
+    local m6 = memory.read32_dumb_str4(addr)
+    local m7 = memory.readFloat32(addr)
+
+    memory.tests.try_float_print_formats(m1, label.."-1")
+    memory.tests.try_float_print_formats(m2, label.."-2")
+    memory.tests.try_float_print_formats(m3, label.."-3")
+    memory.tests.try_float_print_formats(m4, label.."-4")
+    memory.tests.try_float_print_formats(m5, label.."-5")
+    memory.tests.try_float_print_formats(m6, label.."-6")
+    memory.tests.try_float_print_formats(m7, label.."-7")
+end
+
 return memory
