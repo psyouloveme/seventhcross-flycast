@@ -9,7 +9,7 @@ local build_stat_window = require "lua.seventhcross.windows.stats"
 local build_unicode_window = require "lua.seventhcross.windows.unicodetest"
 
 NEXT_PAUSE_DUMP_TYPE = consts.dump_type.None
--- local f = 0
+local ui_render_count = 0
 
 local function cbPause()
   if NEXT_PAUSE_DUMP_TYPE ~= consts.dump_type.None then
@@ -84,7 +84,7 @@ local function cbOverlay()
   if windows_enabled.stats then
     build_stat_window()
   end
-  maingrind_window(windows_enabled, 1)
+  maingrind_window(windows_enabled)
   if windows_enabled.supergrid then
       build_supergrid_window()
   end

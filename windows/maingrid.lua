@@ -1,6 +1,6 @@
 local maingrid = require "lua.seventhcross.maingrid"
-local exports = {}
 
+---@enum GridWindowActionType
 local actions = {
   Step_Grid_X_Up = 0;
   Step_Grid_Y_Up = 1;
@@ -10,34 +10,64 @@ local actions = {
   Step_Grid_Precision_Minus = 5;
   Update_Main_Grid_Start = 6;
   Update_Main_Grid_End = 7;
-  MAIN_GRID_END = 8;
-  Step_Score_Precision_Up = 8;
-  Step_Score_Precision_Down = 9;
-  Update_Score_Grid_Start = 10;
-  Update_Score_Grid_End = 11;
-  SCORE_GRID_END = 12;
+  Toggle_Main_Grid_Autoupdate = 8;
+  MAIN_GRID_END = 9;
+  Step_Score_Precision_Up = 9;
+  Step_Score_Precision_Down = 10;
+  Update_Score_Grid_Start = 11;
+  Update_Score_Grid_End = 12;
+  Toggle_Score_Grid_Autoupdate = 13;
+  SCORE_GRID_END = 14;
 };
 
+---@class GridWindowReducerAction
+---@field type GridWindowActionType Reducer action type
+---@field payload? any Reducer payload
+
+---@class GridWindowState
 Grid_Window_State = {
+  ---@class MainGridWindowState
+  ---@field x integer X coordinate of the displayed 10x10 sub-grid
+  ---@field y integer Y coordinate of the displayed 10x10 sub-grid
+  ---@field precision integer Floating point decimal precision to use for display
+  ---@field grid table|nil Table containing the 10x10 grid
+  ---@field grid_string string|nil String representation of the 10x10 grid for display
+  ---@field changes table|nil Table containing change data determined when updating the grid
+  ---@field changes_string string|nil String representation of the change data for display
+  ---@field loading boolean Internal grid refresh in-progress indicator
+  ---@field autoupdate boolean Enable/disable automatic grid updates
   main_grid = {
-      x = 0;
-      y = 0;
-      grid = nil;
-      grid_string = nil;
-      precision = 4;
-      changes = nil;
-      changes_string = nil;
-      loading = false;
+    x = 0;
+    y = 0;
+    precision = 4;
+    loading = false;
+    autoupdate = false;
+    grid = nil;
+    grid_string = nil;
+    changes = nil;
+    changes_string = nil;
   };
+  ---@class ScoreGridWindowState
+  ---@field grid table|nil 20x20 matrix containing the "score" of a each 10x10 sub-grid
+  ---@field grid_string string|nil String representation of the 20x20 score grid for display
+  ---@field changes table|nil Table containing change data determined when updating the grid
+  ---@field changes_string string|nil String representation of the change data for display
+  ---@field loading boolean Internal grid refresh in-progress indicator
+  ---@field autoupdate boolean Enable/disable automatic grid updates
+  ---@field precision integer Floating point decimal precision to use for display
   score_grid = {
-      grid = nil;
-      grid_string = nil;
-      changes = nil;
-      changes_string = nil;
-      precision = 4;
-      loading = false;
+    precision = 4;
+    loading = false;
+    autoupdate = false;
+    grid = nil;
+    grid_string = nil;
+    changes = nil;
+    changes_string = nil;
   };
 };
+
+---Render count for autoupdate intervals
+local render_count = 0
 
 ---Step function with bound, wrapping on both ends
 ---@param current integer the current position
@@ -81,8 +111,8 @@ local function changes_to_string(changes, precision)
 end
 
 ---Create string representation of grid and calculate changes
----@param next_state { grid: table, grid_string: string, changes: table, changes_string: string } Grid window state to update
----@param prev_state { grid: table, grid_string: string, changes: table, changes_string: string, precision: integer } Previous grid window state
+---@param next_state ScoreGridWindowState | MainGridWindowState Grid window state to update
+---@param prev_state ScoreGridWindowState | MainGridWindowState Previous grid window state
 local function grid_refresh_end(next_state, prev_state)
   local tspc = maingrid.to_string_p_comp(next_state.grid, prev_state.grid, prev_state.precision);
   next_state.grid_string = tspc.grid_string
@@ -91,9 +121,9 @@ local function grid_refresh_end(next_state, prev_state)
 end
 
 ---Reducer for main grid display state
----@param state { x: integer, y: integer, precision: integer, grid: table, grid_string: string, changes: table, changes_string: string } Main grid display state
----@param action { type: integer, payload: table } Action to execute
----@return { x: integer, y: integer, precision: integer, grid: table, grid_string: string, changes: table, changes_string: string } next_state State after action is applied
+---@param state MainGridWindowState Main grid display state
+---@param action GridWindowReducerAction Action to execute
+---@return MainGridWindowState next_state State after action is applied
 local function main_grid_reducer(state, action)
   local next_state = {}
   for k, v in pairs(state) do
@@ -124,6 +154,8 @@ local function main_grid_reducer(state, action)
     next_state.grid = action.payload
     grid_refresh_end(next_state, state)
     print("Main Grid Refresh - End")
+  elseif action.type == actions.Toggle_Main_Grid_Autoupdate then
+    next_state.autoupdate = not state.autoupdate
   end
   if next_state.loading then
     print("Main Grid Refresh - Start")
@@ -132,9 +164,9 @@ local function main_grid_reducer(state, action)
 end
 
 ---Reducer for score grid display state
----@param state { x: integer, y: integer, precision: integer, grid: table, grid_string: string, changes: table, changes_string: string } Score grid display state
----@param action { type: integer, payload: table } Action to execute
----@return { x: integer, y: integer, precision: integer, grid: table, grid_string: string, changes: table, changes_string: string } next_state State after action is applied
+---@param state ScoreGridWindowState Score grid display state
+---@param action GridWindowReducerAction Action to execute
+---@return ScoreGridWindowState next_state State after action is applied
 local function score_grid_reducer(state, action)
   local next_state = {}
   for k, v in pairs(state) do
@@ -161,9 +193,9 @@ local function score_grid_reducer(state, action)
 end
 
 ---Reducer for all maingrid window state actions. 
----@param state table Current window state
----@param action { type: integer, payload: table } Action to execute
----@return table next_state State after action is applied
+---@param state GridWindowState Current window state
+---@param action GridWindowReducerAction Action to execute
+---@return GridWindowState next_state State after action is applied
 local function reducer(state, action)
   local next_state = {}
   for k, v in pairs(state) do
@@ -178,7 +210,7 @@ local function reducer(state, action)
 end
 
 ---Dispatch function for grid window actions
----@param action { type: integer, payload: table } Action to execute
+---@param action GridWindowReducerAction Action to execute
 local function dispatch(action)
   Grid_Window_State = reducer(Grid_Window_State, action)
 end
@@ -191,67 +223,69 @@ local function refresh_main_grid(mg)
 end
 
 ---Create main grid control window 
----@param state table current window state
+---@param state MainGridWindowState current window state
 local function build_grid_controls_window(state)
-  local mg = state.main_grid
-  if not mg.loading and mg.grid == nil then
-    refresh_main_grid(mg)
+  if not state.loading and state.grid == nil then
+    refresh_main_grid(state)
   end
   local ui = flycast.ui
   ui.beginWindow("Move", 1065, 200, 100, 0)
   -- ui.text("Viewing")
   -- ui.text(string.format("(%d,%d)", og_x, og_y))
   ui.button("-x", function()
-    if not mg.loading then
+    if not state.loading then
       dispatch({ type = actions.Step_Grid_X_Down })
-      refresh_main_grid(mg)
+      refresh_main_grid(state)
     else
       print("Not changing grid position - loading new grid view")
     end
   end)
   ui.button("+x", function()
-    if not mg.loading then
+    if not state.loading then
       dispatch({ type = actions.Step_Grid_X_Up })
-      refresh_main_grid(mg)
+      refresh_main_grid(state)
     else
       print("Not changing grid position - loading new grid view")
     end
   end)
   ui.button("-y", function()
-    if not mg.loading then
+    if not state.loading then
       dispatch({ type = actions.Step_Grid_Y_Down })
-      refresh_main_grid(mg)
+      refresh_main_grid(state)
     else
       print("Not changing grid position - loading new grid view")
     end
   end)
   ui.button("+y", function()
-    if not mg.loading then
+    if not state.loading then
       dispatch({ type = actions.Step_Grid_Y_Up })
-      refresh_main_grid(mg)
+      refresh_main_grid(state)
     else
       print("Not changing grid position - loading new grid view")
     end
   end)
   ui.button("-1p", function()
-    if not mg.loading then
+    if not state.loading then
       dispatch({ type = actions.Step_Grid_Precision_Minus })
     else
       print("Not changing precision - loading new grid view")
     end
   end)
   ui.button("+1p", function()
-    if not mg.loading then
+    if not state.loading then
       dispatch({ type = actions.Step_Grid_Precision_Plus })
-      refresh_main_grid(mg)
+      refresh_main_grid(state)
     else
       print("Not changing precision - loading new grid view")
     end
   end)
+  ui.button((state.autoupdate and "O" or "X").." Auto-update", function()
+    dispatch({ type = actions.Toggle_Main_Grid_Autoupdate })
+  end)
   ui.button("Update", function()
-    if not mg.loading then
+    if not state.loading then
       dispatch({ type = actions.Update_Main_Grid_Start })
-      refresh_main_grid(mg)
+      refresh_main_grid(state)
     else
       print("Not refreshing main grid - grid refresh in progress")
     end
@@ -260,35 +294,34 @@ local function build_grid_controls_window(state)
 end
 
 -- Create main grid data viewer
----@param state table current window state
+---@param state MainGridWindowState current window state
 local function build_grid_viewer(state)
-  local mg = state.main_grid
   local ui = flycast.ui
   ui.beginWindow("Grid View", 0, 0, 1060, 0)
-  ui.text(string.format("Viewing grid (%d,%d)", mg.x, mg.y))
-  ui.rightText(string.format("Viewing grid (%d,%d)", mg.x, mg.y))
-  ui.text(mg.grid_string)
+  ui.text(string.format("Viewing grid (%d,%d)", state.x, state.y))
+  ui.rightText(string.format("Viewing grid (%d,%d)", state.x, state.y))
+  ui.text(state.grid_string)
   ui.endWindow()
 end
 
+---Refresh the score grid in state
 local function refresh_score_grid()
-  dispatch({ 
+  dispatch({
     type = actions.Update_Score_Grid_End,
     payload = maingrid.super.get_score_grid()
   })
 end
 
 ---Create score grid control window
----@param state table current window state
+---@param state ScoreGridWindowState current window state
 local function build_score_controls_window(state)
-  local sg = state.score_grid
-  if not sg.loading and sg.grid == nil then
+  if not state.loading and state.grid == nil then
     refresh_score_grid()
   end
   local ui = flycast.ui
   ui.beginWindow("Score", 0, 240, 250, 0)
   ui.button("-1p", function()
-    if not sg.loading then
+    if not state.loading then
       dispatch({ type = actions.Step_Score_Precision_Down })
       refresh_score_grid()
     else
@@ -296,15 +329,18 @@ local function build_score_controls_window(state)
     end
   end)
   ui.button("+1p", function()
-    if not sg.loading then
+    if not state.loading then
       dispatch({ type = actions.Step_Score_Precision_Up })
       refresh_score_grid()
     else
       print("Not changing precision - loading new grid view")
     end
   end)
+  ui.button((state.autoupdate and "O" or "X").." AutoUpdate", function()
+    dispatch({ type = actions.Toggle_Score_Grid_Autoupdate })
+  end)
   ui.button("Update", function()
-    if not sg.loading then
+    if not state.loading then
       refresh_score_grid()
     else
       print("Not refreshing score grid - grid refresh in progress")
@@ -314,25 +350,25 @@ local function build_score_controls_window(state)
 end
 
 ---Build score grid viewer window
----@param state { score_grid: { grid_string: string }} Score grid state
+---@param state ScoreGridWindowState Score grid state
 local function build_score_viewer(state)
   local ui = flycast.ui
   ui.beginWindow("Score View", 0, 0, 0, 235)
-  ui.text(state.score_grid.grid_string)
+  ui.text(state.grid_string)
   ui.endWindow()
 end
 
 ---Build main and score grid windows
 ---@param visibility { maingrid: boolean, scoregrid: boolean } Window visibility options
----@param render_count integer UI render count
-local function build_grid_windows(visibility, render_count)
+local function build_grid_windows(visibility)
+  render_count = render_count + 1
   if visibility.maingrid then
-    build_grid_controls_window(Grid_Window_State)
-    build_grid_viewer(Grid_Window_State)
+    build_grid_controls_window(Grid_Window_State.main_grid)
+    build_grid_viewer(Grid_Window_State.main_grid)
   end
   if visibility.scoregrid then
-    build_score_controls_window(Grid_Window_State)
-    build_score_viewer(Grid_Window_State)
+    build_score_controls_window(Grid_Window_State.score_grid)
+    build_score_viewer(Grid_Window_State.score_grid)
   end
 end
 
