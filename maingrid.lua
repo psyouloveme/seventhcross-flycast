@@ -73,7 +73,7 @@ local grid = {
                 local idx = (y * consts.grid.main.width) + x
                 local size_idx = idx * consts.grid.main.value_size
                 local ad = size_idx + consts.grid.main.start_address
-                print(string.format("coord.to_offset - %d %d 0x%08x", idx, size_idx, ad))
+                -- print(string.format("coord.to_offset - %d %d 0x%08x", idx, size_idx, ad))
                 return (((y * consts.grid.main.width) + x) * consts.grid.main.value_size) + consts.grid.main.start_address
             end;
 
@@ -142,7 +142,7 @@ local grid = {
             to_main_index = function(x, y)
                 local xpart = (x * consts.grid.sub.width)
                 local ypart = (y * consts.grid.sub.width * consts.grid.main.width)
-                print(string.format("%d %d -> ypart: %d  xpart: %d", x, y, ypart, xpart))
+                -- print(string.format("%d %d -> ypart: %d  xpart: %d", x, y, ypart, xpart))
                 return (y * consts.grid.sub.width * consts.grid.main.width) + (x * consts.grid.sub.width * consts.grid.sub.height)
             end;
 
@@ -190,6 +190,23 @@ local grid = {
             end;
         };
     };
+    compare = function (a, b)
+        local changes = {}
+        for y = 0, #a do
+            for x = 0, #a[0] do
+                if a[x][y] ~= b[x][y] then
+                    table.insert(changes, {
+                        a = a[x][y];
+                        b = b[x][y];
+                        x = x;
+                        y = y;
+                    })
+                end
+            end
+        end
+        return changes
+    end;
+
     to_string = function (grid)
         local st = "\t\t\t"
         for a = 0, #grid[0] do
@@ -199,7 +216,7 @@ local grid = {
         for g = 0, #grid do
             st = st..string.format("%02d\t", g)
             for h = 0, #grid[g] do
-                st = st..string.format("%0.9f",grid[g][h])
+                st = st..string.format("%0.9f",grid[h][g])
                 if h ~= #grid[g] then
                     st = st .. "\t"
                 end
@@ -211,6 +228,84 @@ local grid = {
             -- io.write("\n")
         end
         return st
+    end;
+    to_string_p = function (grid, precision)
+        local st = "    \t"
+        local fmt = "%0."..tostring(precision).."f"
+        for a = 0, #grid[0] do
+                                --    00.
+            st = st..string.format("%02d", a)
+            for a = 1, precision do
+                st = st.."_"                
+            end
+            if precision < 5 then
+                st = st.."\t"
+            elseif precision < 7 then
+                st = st.."\t\t"
+            else
+                st = st.."\t\t"
+            end
+            -- st = st..'\t'
+        end
+        -- "┌────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┬────┐"
+   
+        st = st.."\n"
+        for g = 0, #grid do
+            st = st..string.format("%02d\t", g)
+            for h = 0, #grid[g] do
+                st = st..string.format(fmt, grid[h][g])
+                if h ~= #grid[g] then
+                    st = st .. "\t"
+                end
+                -- st = st..string.format("%f", grid[g][h]) .. "    "
+                -- io.write(string.format("%02d", grid[g][h]) .. " ")
+            end
+    
+            st = st.."\n"
+            -- io.write("\n")
+        end
+        return st
+    end;
+    to_string_p_comp = function (grid_a, grid_b, precision)
+        local st = "    \t"
+        local fmt = "%0."..tostring(precision).."f"
+        local changes = {}
+        for a = 0, #grid_a[0] do
+            st = st..string.format("%02d", a)
+            for a = 1, precision do
+                st = st.."_"   
+            end
+            if precision < 5 then
+                st = st.."\t"
+            elseif precision < 7 then
+                st = st.."\t\t"
+            else
+                st = st.."\t\t"
+            end
+        end
+        st = st.."\n"
+        for g = 0, #grid_a do
+            st = st..string.format("%02d\t", g)
+            for h = 0, #grid_a[g] do
+                if grid_b ~= nil and grid_b[h] ~= nil and grid_a[h][g] ~= grid_b[h][g] then
+                    table.insert(changes, {
+                        a = grid_a[h][g];
+                        b = grid_b[h][g];
+                        x = h;
+                        y = g;
+                    })
+                end
+                st = st..string.format(fmt, grid_a[h][g])
+                if h ~= #grid_a[g] then
+                    st = st .. "\t"
+                end
+            end
+            st = st.."\n"
+        end
+        return {
+            grid_string = st;
+            changes = changes;
+        }
     end;
     tests = {};
 };
@@ -244,7 +339,6 @@ end
 ---@param y integer super-grid matrix representation y coordinate.
 ---@return number[][] subgrid a 10x10 matrix of floats that correspond the super-grid coordinate (x,y).
 function grid.sub.read_by_super_coord(x,y)
-    local mgc = grid.super.coord.to_main_offset(x, y)
     local g = {}
     for k = 0, consts.grid.sub.width - 1 do
         for j = 0, consts.grid.sub.width - 1 do
@@ -255,6 +349,37 @@ function grid.sub.read_by_super_coord(x,y)
                 g[j][k] = {}
             end
             g[j][k] = grid.main.read_value_by_super_sub_coord(x, y, j, k)
+        end
+    end
+    return g
+end
+
+function grid.sub.score_by_super_coord(x,y)
+    local score = 0
+    for k = 0, consts.grid.sub.width - 1 do
+        for j = 0, consts.grid.sub.width - 1 do
+            local w = grid.main.read_value_by_super_sub_coord(x, y, j, k)
+            local wd = w;
+            wd = wd * wd;
+            local scored = score;
+            scored = scored + wd;
+            score = scored;
+        end
+    end
+    return score
+end
+
+function grid.super.get_score_grid()
+    local g = {}
+    for k = 0, consts.grid.super.width - 1 do
+        for j = 0, consts.grid.super.width - 1 do
+            if g[j] == nil then
+                g[j] = {}
+            end
+            if g[j][k] == nil then
+                g[j][k] = {}
+            end
+            g[j][k] = grid.sub.score_by_super_coord(j, k)
         end
     end
     return g

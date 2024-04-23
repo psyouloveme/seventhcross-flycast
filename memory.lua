@@ -63,7 +63,7 @@ end
 
 function memory.readFloat32(addr)
     local bs = memory.read32(addr)
-    print(string.format("bs: 0x%08x",bs))
+    -- print(string.format("bs: 0x%08x",bs))
     -- print(string.format("about to repack %04x read at %08x", bs, addr))
     local ss = string.pack("i4",bs)
     local ff = string.unpack("f",ss)

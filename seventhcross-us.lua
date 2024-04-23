@@ -6,6 +6,7 @@ local build_supergrid_window = require "lua.seventhcross.windows.supergrid"
 local build_evp_window = require "lua.seventhcross.windows.evp"
 local calc_window = require "lua.seventhcross.windows.calc"
 local build_stat_window = require "lua.seventhcross.windows.stats"
+local build_unicode_window = require "lua.seventhcross.windows.unicodetest"
 
 NEXT_PAUSE_DUMP_TYPE = consts.dump_type.None
 -- local f = 0
@@ -39,9 +40,11 @@ end
 local windows_enabled = {
   evp = false,
   stats = false,
-  maingrid = true,
-  supergrid = true,
-  calc = true
+  maingrid = false,
+  supergrid = false,
+  calc = false,
+  scoregrid = true,
+  unicodetest = false
 }
 
 local function build_toggle(name, uiname)
@@ -68,6 +71,8 @@ local function build_window_controls()
   build_toggle("maingrid", "Maingrid")
   build_toggle("supergrid", "Supergrid")
   build_toggle("calc", "Calc")
+  build_toggle("scoregrid", "Score")
+  build_toggle("unicodetest", "Unicode")
   ui.endWindow()
 end
 
@@ -79,15 +84,15 @@ local function cbOverlay()
   if windows_enabled.stats then
     build_stat_window()
   end
-  if windows_enabled.maingrid then
-    maingrind_window.build_grid_viewer()
-    maingrind_window.build_grid_controls_window()
-  end
+  maingrind_window(windows_enabled, 1)
   if windows_enabled.supergrid then
       build_supergrid_window()
   end
   if windows_enabled.calc then
     calc_window.build_calc_window()
+  end
+  if windows_enabled.unicodetest then
+    build_unicode_window()
   end
   -- f = f + 1
   -- build_evp_window()
