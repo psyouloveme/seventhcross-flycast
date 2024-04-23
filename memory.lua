@@ -1,15 +1,24 @@
 local memory = {}
 
+---Read a 1-byte (8-bit) value from memory
+---@param addr integer the memory address to read from
+---@return any value the value read from memory
 function memory.read8(addr)
     local val = flycast.memory.read8(addr)
     return val
 end
 
+---Read a 2-byte (16-bit) value from memory
+---@param addr integer the memory address to read from
+---@return any value the value read from memory
 function memory.read16(addr)
     local val = flycast.memory.read16(addr)
     return val
 end
 
+---Read a 2-byte (16-bit) value from memory then reverse the byte order
+---@param addr integer the memory address to read from
+---@return any value the value read from memory
 function memory.read16_rbo(addr)
     local val = flycast.memory.read16(addr)
     local rbo = 0
@@ -19,16 +28,25 @@ function memory.read16_rbo(addr)
     return rbo
 end
 
+---Read a 4-byte (32-bit) value from memory
+---@param addr integer the memory address to read from
+---@return any value the value read from memory
 function memory.read32(addr)
     local val = flycast.memory.read32(addr)
     return val
 end
 
+---Read a 8-byte (64-bit) value from memory
+---@param addr integer the memory address to read from
+---@return any value the value read from memory
 function memory.read64(addr)
     local val = flycast.memory.read64(addr)
     return val
 end
 
+---DEPRECATED: Read a 4-byte (32-bit) floating point value from memory
+---@param addr integer the memory address to read from
+---@return number|nil value the value read from memory
 function memory.read32_dumb_str(addr)
     local b1 = memory.util.tohexchar(memory.read8(addr))
     local b2 = memory.util.tohexchar(memory.read8(addr+1))
@@ -37,6 +55,9 @@ function memory.read32_dumb_str(addr)
     return tonumber(b4..b3..b2..b1)
 end
 
+---DEPRECATED: Read a 4-byte (32-bit) floating point value from memory
+---@param addr integer the memory address to read from
+---@return number|nil value the value read from memory
 function memory.read32_dumb_str2(addr)
     local b1 = memory.util.tohexchar(memory.read8(addr))
     local b2 = memory.util.tohexchar(memory.read8(addr+1))
@@ -45,6 +66,9 @@ function memory.read32_dumb_str2(addr)
     return memory.util.convertFloat(b4..b3..b2..b1)
 end
 
+---DEPRECATED: Read a 4-byte (32-bit) floating point value from memory
+---@param addr integer the memory address to read from
+---@return number|nil value the value read from memory
 function memory.read32_dumb_str3(addr)
     local b1 = memory.util.tohexchar(memory.read8(addr))
     local b2 = memory.util.tohexchar(memory.read8(addr+1))
@@ -53,6 +77,9 @@ function memory.read32_dumb_str3(addr)
     return tonumber(b1..b2..b3..b4)
 end
 
+---DEPRECATED: Read a 4-byte (32-bit) floating point value from memory
+---@param addr integer the memory address to read from
+---@return number value the value read from memory
 function memory.read32_dumb_str4(addr)
     local b1 = memory.util.tohexchar(memory.read8(addr))
     local b2 = memory.util.tohexchar(memory.read8(addr+1))
@@ -61,6 +88,10 @@ function memory.read32_dumb_str4(addr)
     return memory.util.convertFloat(b1..b2..b3..b4)
 end
 
+
+---Read a 4-byte (32-bit) floating point value from memory
+---@param addr integer the memory address to read from
+---@return number value the value read from memory
 function memory.readFloat32(addr)
     local bs = memory.read32(addr)
     -- print(string.format("bs: 0x%08x",bs))
@@ -70,7 +101,9 @@ function memory.readFloat32(addr)
     return ff
 end
 
-
+---DEPRECATED: Read a 4-byte (32-bit) floating point value from memory
+---@param addr integer the memory address to read from
+---@return number value the value read from memory
 function memory.readFloat32_old(addr)
     local raw_val = memory.read32(addr)
     return memory.util.fix_mem_float(raw_val)
@@ -80,20 +113,26 @@ function memory.readFloat32_old(addr)
 end
 
 memory.util = {}
+
+---Convert a number to a hex string
+---@param c any the number to convert
+---@return string result the hex string representation
 function memory.util.tohexchar(c)
     return string.format("%02x", c)
 end
 
-function memory.util.tohexstr(s)
-    return string.format("%02x", s)
-end
-
+---DEPRECATED: attempt to fix a floating point number read from memory
+---@param raw_val any the number to fix
+---@return number result the floating point result
 function memory.util.fix_mem_float(raw_val)
     local string_val = string.format("%04x",raw_val)
     local converted_val = memory.util.convertFloat(string_val)
     return converted_val
 end
 
+---Convert a value to a hex string in reverse byte order
+---@param bytes any the number to convert
+---@return string result the reverse byte order string representation
 function memory.util.get_rbo_string(bytes)
     local temp_hex_string = string.format("%04x",bytes)
     local temp_table = {}
@@ -105,11 +144,22 @@ function memory.util.get_rbo_string(bytes)
     return final_string
 end
 
+---Convert a value to a hex string in reverse byte order
+---@param bytes any the number to convert
+---@return number result the number representation of the reversed value
 function memory.util.reverse_byte_order(bytes)
-    return tonumber(memory.util.get_rbo_string(bytes))
+    local n = tonumber(memory.util.get_rbo_string(bytes))
+    if n == nil then
+        error("unable to reverse byte order of "..tostring(bytes))
+    end
+    return n
 end
 
--- http://lua-users.org/lists/lua-l/2010-03/msg00910.html
+---http://lua-users.org/lists/lua-l/2010-03/msg00910.html
+---Convert a float from memory to a version that can be represented as bytes.
+---This isn't the original intended use of this method.
+---@param x number|string the float to convert
+---@return integer val byte string value that can be used to print raw bytes
 function memory.util.convertFloat(x)
     local sign = 1
     local mantissa = string.byte(x, 3) % 128

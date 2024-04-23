@@ -279,7 +279,7 @@ local grid = {
         for a = 0, #grid[0] do
                                 --    00.
             st = st..string.format("%02d", a)
-            for a = 1, precision do
+            for aaaa = 1, precision do
                 st = st.."_"                
             end
             if precision < 5 then
@@ -322,7 +322,7 @@ local grid = {
         local changes = {}
         for a = 0, #grid_a[0] do
             st = st..string.format("%02d", a)
-            for a = 1, precision do
+            for aaa = 1, precision do
                 st = st.."_"   
             end
             if precision < 5 then
