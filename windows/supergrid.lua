@@ -1,4 +1,4 @@
-local supergrid = require "lua.seventhcross.supergrid"
+local supergrid = require "lua.seventhcross.components.supergrid"
 local constants = require "lua.seventhcross.constants"
 local supergrid_str = nil
 local supergrid_matrix = nil

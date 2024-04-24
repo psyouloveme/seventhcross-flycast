@@ -1,6 +1,6 @@
-local memory = require("lua.seventhcross.memory")
-local supergrid = require("lua.seventhcross.supergrid")
-local grid      = require("lua.seventhcross.grid")
+local memory = require("lua.seventhcross.emulator.memory")
+local supergrid = require("lua.seventhcross.components.supergrid")
+local grid      = require("lua.seventhcross.components.grid")
 local GRID_DEF = 0x8c3be40c
 local SUPER_GRID_DEF = 0x8c0c72b4
 
@@ -20,6 +20,7 @@ end
 
 -- coords - list if indices, not actual coodinate pairs
 local function calculate_score(coord, coords)
+    local index = grid.outer_grid.coord_to_index(coord.x, coord.y, coord.x, coord.y)
     print(string.format("Calculate Score: index: %d coords: ", index).. tostring(table.unpack(coords)))
     local grid_ptr_cpy = GRID_DEF + (index * 100 * 4)
     local score = 0
@@ -82,7 +83,8 @@ local function find_simplest(search_idx, attempts)
             table.insert(pattern, i)
 
             -- float search_score = calculate_score(search_idx, pattern);
-            local search_score = calculate_score(coord, pattern)
+            -- local search_score = calculate_score(coord, pattern)
+            local search_score = 0
 
             -- int best_idx = 0;
             local best_idx = 0

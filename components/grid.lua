@@ -1,4 +1,4 @@
-local memory = require("lua.seventhcross.memory")
+local memory = require("lua.seventhcross.emulator.memory")
 local consts = require("lua.seventhcross.constants")
 
 local sg = {}
@@ -115,7 +115,7 @@ end
 
 local function coord_to_idx(y,x)
     -- print(string.format("coord_to_idx %d, %d -> %d", x, y, (y * 20) + x))
-    return (y * grid_props.dimensions.height) + (x * constants.sizeof.byte)
+    return (y * grid_props.dimensions.height) + (x * consts.sizeof.byte)
 end
 
 

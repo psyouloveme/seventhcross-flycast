@@ -1,6 +1,6 @@
-local memory = require("lua.seventhcross.memory")
-local supergrid = require("lua.seventhcross.supergrid")
-local grid      = require("lua.seventhcross.grid")
+local memory = require("lua.seventhcross.emulator.memory")
+local supergrid = require("lua.seventhcross.components.supergrid")
+local grid      = require("lua.seventhcross.components.grid")
 local GRID_DEF = 0x8c3be40c
 local SUPER_GRID_DEF = 0x8c0c72b4
 
@@ -20,11 +20,11 @@ end
 
 -- coords - list if indices, not actual coodinate pairs
 local function calculate_score(coord, coords)
-    print(string.format("Calculate Score: index: %d coords: ", index).. tostring(table.unpack(coords)))
-    local grid_ptr_cpy = GRID_DEF + (index * 100 * 4)
+    -- print(string.format("Calculate Score: index: %d coords: ", index).. tostring(table.unpack(coords)))
+    -- local index = main
+    local grid_ptr_cpy = GRID_DEF + (grid.outer_grid.coord_to_index(coord.x, coord.y) * 100 * 4)
     local score = 0
     -- local grid = sg.read_inner_grid(x, y)
-    local coord = grid.idx_to_coord(index)
     for i = 0, 100 do
         if is_index_in_list(i, coords) then
             local w = 1.0 - memory.readFloat32(grid_ptr_cpy + (i*4))

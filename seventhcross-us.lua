@@ -1,16 +1,27 @@
 require "string"
-local dump = require "lua.seventhcross.dump"
-local consts = require "lua.seventhcross.constants"
-local maingrind_window = require "lua.seventhcross.windows.maingrid"
+local consts                 = require "lua.seventhcross.constants"
+local dump                   = require "lua.seventhcross.components.dump"
+local build_calc_window      = require "lua.seventhcross.windows.calc"
+local build_dump_window      = require "lua.seventhcross.windows.dump"
+local build_evp_window       = require "lua.seventhcross.windows.evp"
+local build_maingrid_window  = require "lua.seventhcross.windows.maingrid"
+local build_memory_window    = require "lua.seventhcross.windows.memorytable"
+local build_scoregrid_window = require "lua.seventhcross.windows.scoregrid"
 local build_supergrid_window = require "lua.seventhcross.windows.supergrid"
-local build_evp_window = require "lua.seventhcross.windows.evp"
-local calc_window = require "lua.seventhcross.windows.calc"
-local build_stat_window = require "lua.seventhcross.windows.stats"
-local build_unicode_window = require "lua.seventhcross.windows.unicodetest"
+local build_test_window      = require "lua.seventhcross.windows.tests"
+local build_unicode_window   = require "lua.seventhcross.windows.unicodetest"
 
+---do this dumb workaround to get typing for the global
+---@type Flycast
+_G.flycast = _G.flycast
+
+---dump type storage to use in dump window
 NEXT_PAUSE_DUMP_TYPE = consts.dump_type.None
+
+---Meta UI render counter
 local ui_render_count = 0
 
+---Pause callback
 local function cbPause()
   if NEXT_PAUSE_DUMP_TYPE ~= consts.dump_type.None then
     dump.do_gui_dump(NEXT_PAUSE_DUMP_TYPE)
@@ -20,33 +31,42 @@ local function cbPause()
   end
 end
 
+---Terminate callback
 local function cbTerminate()
   print("Game terminated")
 end
 
+---Load state callback
 local function cbLoadState()
   print("State loaded")
 end
 
+---VBlank callback
 local function cbVBlank()
 --  print("vblank x,y=", flycast.input.getAbsCoordinates(1))
 end
 
+---Resume callback
 local function cbResume()
   print("Game resumed")
 end
 
-
+---@class WindowEnabledState
 local windows_enabled = {
-  evp = false,
-  stats = false,
-  maingrid = false,
-  supergrid = false,
-  calc = false,
-  scoregrid = true,
-  unicodetest = false
+  calc = false;
+  dump = false;
+  evp = false;
+  maingrid = false;
+  memorytable = false;
+  scoregrid = false;
+  supergrid = false;
+  tests = false;
+  unicodetest = false;
 }
 
+---Build a toggle button for a meta window control
+---@param name string key into window enabled state
+---@param uiname string name to display on the toggle button
 local function build_toggle(name, uiname)
   local txt
   local we = windows_enabled
@@ -62,61 +82,65 @@ local function build_toggle(name, uiname)
   end
 end
 
+---Build meta window controls
 local function build_window_controls()
   local ui = flycast.ui
-  local txt = ""
   ui.beginWindow("Windows", 1065, 0, 0, 0)
-  build_toggle("evp", "EVP")
-  build_toggle("stats", "Stats")
-  build_toggle("maingrid", "Maingrid")
-  build_toggle("supergrid", "Supergrid")
   build_toggle("calc", "Calc")
-  build_toggle("scoregrid", "Score")
+  build_toggle("dump", "Dump")
+  build_toggle("evp", "EVP")
+  build_toggle("maingrid", "Main Grid")
+  build_toggle("memorytable", "Memory")
+  build_toggle("scoregrid", "Score Grid")
+  build_toggle("supergrid", "Super Grid")
+  build_toggle("tests", "Tests")
   build_toggle("unicodetest", "Unicode")
   ui.endWindow()
 end
 
+---Overlay callback
 local function cbOverlay()
   build_window_controls()
-  if windows_enabled.evp then
+  local we = windows_enabled
+  if we.calc then
+    build_calc_window()
+  end
+  if we.dump then
+    build_dump_window()
+  end
+  if we.evp then
     build_evp_window()
   end
-  if windows_enabled.stats then
-    build_stat_window()
+  if we.maingrid then
+    build_maingrid_window()
   end
-  maingrind_window(windows_enabled)
-  if windows_enabled.supergrid then
-      build_supergrid_window()
+  if we.memorytable then
+    build_memory_window()
   end
-  if windows_enabled.calc then
-    calc_window.build_calc_window()
+  if we.scoregrid then
+    build_scoregrid_window()
   end
-  if windows_enabled.unicodetest then
+  if we.supergrid then
+    build_supergrid_window()
+  end
+  if we.tests then
+    build_test_window()
+  end
+  if we.unicodetest then
     build_unicode_window()
   end
-  -- f = f + 1
-  -- build_evp_window()
-  -- build_stat_window()
-  -- build_supergrid_window()
-  -- maingrind_window.build_grid_controls_window()
-  -- maingrind_window.build_grid_viewer()
-  -- calc_window.build_calc_window()
-  -- build_supergrid_window()
-  -- build_maingrid_window()
-  -- build_grid_controls()
-  -- build_maingrid_window()
 end
 
+---Start callback
 local function cbStart()
   local s = flycast.state
   print("Game started: " .. s.media)
   print("Game Id: " .. s.gameId)
   print("Display: " .. s.display.width .. "x" .. s.display.height)
   flycast.emulator.loadState(1)
-  -- supergrid_matrix = supergrid.read_supergrid()
-  -- maingrid_matrix_test = maingrid.read_inner_grid(maingrid_coord.x, maingrid_coord.y)
 end
 
+---@type Flycast.Callbacks
 flycast_callbacks = {
   start = cbStart,
   pause = cbPause,
@@ -127,5 +151,5 @@ flycast_callbacks = {
   overlay = cbOverlay
 }
 
-print("Callbacks set")
 flycast.emulator.startGame("C:\\drop\\flycast\\rom\\Seventh Cross Evolution v1.000 (1999)(UFO)(US)[!]\\Seventh Cross Evolution v1.000 (1999)(UFO)(US)[!].gdi")
+print("Game Loaded")

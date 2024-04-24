@@ -1,4 +1,4 @@
-local memory = require("lua.seventhcross.memory")
+local memory = require("lua.seventhcross.emulator.memory")
 local GRID_DEF = 0x8c3be40c
 local SUPER_GRID_DEF = 0x8c0c72b4
 

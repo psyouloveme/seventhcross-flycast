@@ -1,6 +1,6 @@
 ---Grid operations
 local consts = require("lua.seventhcross.constants")
-local memory = require("lua.seventhcross.memory")
+local memory = require("lua.seventhcross.emulator.memory")
 
 ---@class Coord2 (x, y) coordinate
 ---@field x integer x coordinate.
@@ -24,7 +24,6 @@ local memory = require("lua.seventhcross.memory")
     into 40 10x10 grids that correspond to positions in the
     20x20 super-grid.
 ]]
----@module "lua.seventhcross.maingrid"
 local grid = {
     --[[
         The main 200x200 evolution grid that is sub-divided

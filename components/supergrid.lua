@@ -1,4 +1,4 @@
-local memory = require "lua.seventhcross.memory"
+local memory = require "lua.seventhcross.emulator.memory"
 local constants = require "lua.seventhcross.constants"
 local function debug_print(label, val)
     print(string.format("  %s: 0x%06x (%d)", label, val, val))

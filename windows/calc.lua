@@ -1,6 +1,6 @@
-local partfind = require "lua.seventhcross.partfind"
+local partfind = require "lua.seventhcross.components.partfind"
 local constants = require "lua.seventhcross.constants"
-local grid = require "lua.seventhcross.maingrid"
+local grid = require "lua.seventhcross.components.maingrid"
 
 
 local exports = {}
@@ -56,7 +56,7 @@ end
 
 
 
-function exports.build_calc_window()
+local function build_calc_window()
     local ui = flycast.ui
     local memory = flycast.memory
     ui.beginWindow("Calc", 960, 270, 100, 0)
@@ -107,8 +107,25 @@ function exports.build_calc_window()
     end)
     ui.button("L30 Leg", function()
       partfind.do_function_f(constants.parts.LEG, 30, 2)
-      -- grid.do_function_f(constants.parts.LEG, 30, 2)
+      grid.do_function_f(constants.parts.LEG, 30, 2)
+    end)
+    ui.button("L30 Leg", function()
+      partfind.do_function_f(grid.PART_TYPE_LEG, 30, 2)
+      grid.do_function_f(grid.PART_TYPE_LEG, 30, 2)
+    end)
+    ui.button("L30 Body", function()
+      partfind.do_function_f(grid.PART_TYPE_BODY, 30, 2)
+      grid.do_function_f(grid.PART_TYPE_BODY, 30, 2)
+    end)
+    ui.button("L30 Arm", function()
+      partfind.do_function_f(grid.PART_TYPE_ARM, 30, 2)
+      grid.do_function_f(grid.PART_TYPE_ARM, 30, 2)
+    end)
+    ui.button("L30 Head", function()
+      partfind.do_function_f(grid.PART_TYPE_HEAD, 30, 2)
+      grid.do_function_f(grid.PART_TYPE_ARM, 30, 2)
     end)
     ui.endWindow()
 end
-return exports
+
+return build_calc_window
