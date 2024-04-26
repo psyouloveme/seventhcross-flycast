@@ -1,4 +1,4 @@
-local stats = require "flycast-win64-2.3.lua.seventhcross.components.stats"
+local stats = require "lua.seventhcross.components.stats"
 local consts = require("lua.seventhcross.constants")
 
 local stats_current = nil

@@ -1,5 +1,5 @@
 
-local memory = require("lua.seventhcross.memory")
+local memory = require("lua.seventhcross.emulator.memory")
 local consts = require("lua.seventhcross.constants")
 
 local stat_exports = {}
@@ -94,7 +94,7 @@ function stat_exports.getStatMemoryTable()
         elseif v.type_name == types.UShort then
             tbl[k] = memory.read16(k)
         elseif v.type_name == types.Short then
-            tbl[k] = memory.read16_rbo(k)
+            tbl[k] = memory.read16(k)
         elseif v.type_name == types.Float then
             tbl[k] = memory.read32(k)
         elseif v.type_name == types.String then

@@ -8,6 +8,7 @@
 ---@field saveState fun(index: integer): nil
 ---@field loadState fun(index: integer): nil
 ---@field exit fun(): nil
+---@field displayNotification fun(message: string, duration: integer): nil
 
 ---@class Flycast.GeneralConfig
 ---@field Cable integer

@@ -187,6 +187,14 @@ local grid = {
             to_index = function(x,y)
                 return (y * consts.grid.super.width) + x;
             end;
+
+            ---Translate a 20x20 super-grid coordinate to an index into the array represenation of the super-grid.
+            ---@param x integer x coordinate of the matrix representation of the super-grid to translate.
+            ---@param y integer y coordinate of the matrix representation of the super-grid to translate.
+            ---@return integer index the corresponding array index of the coordinate
+            to_offset = function(x,y)
+                return (((y * consts.grid.super.width) + x) * consts.grid.super.value_size) + consts.grid.super.start_address;
+            end;
         };
         ---Conversion methods for super grid indices
         index = {
@@ -197,6 +205,8 @@ local grid = {
                 };
             end;
         };
+
+
     };
 
     --[[
@@ -424,6 +434,40 @@ function grid.sub.score_by_super_coord(x,y)
     return score
 end
 
+local function is_coord_in_pattern(x, y, pattern)
+    for key, val in pairs(pattern) do
+        if val.x == x and val.y == y then
+            return true
+        end
+    end
+    return false
+end
+
+
+---Compute the "score" of a 10x10 sub-grid by super-grid coordinates
+---@param x integer super-grid matrix representation x coordinate.
+---@param y integer super-grid matrix representation y coordinate.
+---@return number score the square sum of the component values
+function grid.sub.score_by_super_coord_pattern(x, y, pattern)
+    local score = 0
+    for y2 = 0, consts.grid.sub.width - 1 do
+        for x2 = 0, consts.grid.sub.width - 1 do
+            local w
+            if is_coord_in_pattern(x2, y2, pattern) then
+                w = 1.0 - grid.main.read_value_by_super_sub_coord(x, y, x2, y2)
+            else
+                w = grid.main.read_value_by_super_sub_coord(x, y, x2, y2)
+            end
+            local wd = w;
+            wd = wd * wd;
+            local scored = score;
+            scored = scored + wd;
+            score = scored;
+        end
+    end
+    return score
+end
+
 ---Create a 20x20 grid of floating point score values corresponding to the super-grid
 ---@return Grid subgrid a 10x10 matrix of floats that correspond the super-grid coordinate (x,y).
 function grid.super.get_score_grid()
@@ -461,6 +505,90 @@ function grid.sub.read_by_super_coord_transposed(x,y)
     end
     return g
 end
+
+function grid.super.read_by_coord(x, y)
+    local addr = grid.super.coord.to_offset(x, y)
+    return memory.read8(addr)
+end
+
+function grid.super.read()
+    local g = {}
+    for y = 0, consts.grid.super.height - 1, 1 do
+        for x = 0, consts.grid.super.width - 1, 1 do
+            if g[x] == nil then
+                g[x] = {}
+            end
+            if g[x][y] == nil then
+                g[x][y] = {}
+            end
+            g[x][y] = grid.super.read_by_coord(x,y)
+        end
+    end
+end
+
+---Get the bounds
+---@param part_type PartType
+---@return table
+function grid.super.get_part_quadrant_bounds(part_type)
+    return {
+        y_min = 0 + ((part_type >> 1) * 10);
+        y_max = 10 + ((part_type >> 1) * 10);
+        x_min = 0 + ((part_type & 1) * 10);
+        x_max = 10 + ((part_type & 1) * 10);
+    }
+end
+
+function grid.super.read_part_quadrant(part_type, display)
+    local q = {}
+    local bounds = grid.super.get_part_quadrant_bounds(part_type)
+
+    -- print(string.format("x min %d, y min %d, x max %d, y max %d", x_min, y_min, x_max, y_max))
+    for y = bounds.y_min, bounds.y_max - 1, 1 do
+        for x = bounds.x_min, bounds.x_max - 1, 1 do
+            local adj_x = x
+            local adj_y = y
+            if display then
+                adj_x = x - bounds.x_min
+                adj_y = y - bounds.y_min
+            end
+            if q[adj_x] == nil then
+                q[adj_x] = {}
+            end
+            if q[adj_x][adj_y] == nil then
+                q[adj_x][adj_y] = {}
+            end
+            local idx = grid.super.coord.to_index(x,y)
+            -- local coord = grid.super.index.to_coord(idx)
+            -- print(string.format("%d %d %d ?= %d %d %d", x, y, idx, idx, coord.x, coord.y))
+            -- print(string.format("reading 0x%08x", constants.addrs.SuperGrid + idx))
+            q[adj_x][adj_y] = memory.read8(consts.addrs.SuperGrid + idx)
+        end
+    end
+    return q
+end;
+
+---Find a super coordinate by part type and value
+---@param part_type PartType
+---@param level integer
+---@return Coord2[] coords 
+function grid.super.find_coords_by_value(part_type, level)
+    ---@type Coord2[]
+    local q = {}
+    local bounds = grid.super.get_part_quadrant_bounds(part_type)
+    for y = bounds.y_min, bounds.y_max - 1, 1 do
+        for x = bounds.x_min, bounds.x_max - 1, 1 do
+            local offset = grid.super.coord.to_offset(x,y)
+            local val = memory.read8(offset)
+            if level == val then
+                table.insert(q, {
+                    x = x;
+                    y = y;
+                })
+            end
+        end
+    end
+    return q
+end;
 
 --[[ ********** Tests **********]]
 ---Unchecked test for several conversion methods

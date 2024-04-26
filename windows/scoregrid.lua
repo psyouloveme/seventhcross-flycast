@@ -15,10 +15,10 @@ local actions = {
 ---@field payload? any Reducer payload
 
 ---@class ScoreGridWindowState
----@field grid table|nil 20x20 matrix containing the "score" of a each 10x10 sub-grid
----@field grid_string string|nil String representation of the 20x20 score grid for display
----@field changes table|nil Table containing change data determined when updating the grid
----@field changes_string string|nil String representation of the change data for display
+---@field grid? number[][] 20x20 matrix containing the "score" of a each 10x10 sub-grid
+---@field grid_string? string String representation of the 20x20 score grid for display
+---@field changes? number[][] Table containing change data determined when updating the grid
+---@field changes_string? string String representation of the change data for display
 ---@field loading boolean Internal grid refresh in-progress indicator
 ---@field autoupdate boolean Enable/disable automatic grid updates
 ---@field precision integer Floating point decimal precision to use for display

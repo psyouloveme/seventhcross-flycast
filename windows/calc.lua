@@ -1,6 +1,7 @@
 local partfind = require "lua.seventhcross.components.partfind"
 local constants = require "lua.seventhcross.constants"
 local grid = require "lua.seventhcross.components.maingrid"
+local calcc = require "lua.seventhcross.components.calculator3"
 
 
 local exports = {}
@@ -110,20 +111,16 @@ local function build_calc_window()
       grid.do_function_f(constants.parts.LEG, 30, 2)
     end)
     ui.button("L30 Leg", function()
-      partfind.do_function_f(grid.PART_TYPE_LEG, 30, 2)
-      grid.do_function_f(grid.PART_TYPE_LEG, 30, 2)
+      calcc.find_part(constants.parts.LEG, 30, 5)
     end)
     ui.button("L30 Body", function()
-      partfind.do_function_f(grid.PART_TYPE_BODY, 30, 2)
-      grid.do_function_f(grid.PART_TYPE_BODY, 30, 2)
+      calcc.find_part(constants.parts.BODY, 30, 5)
     end)
     ui.button("L30 Arm", function()
-      partfind.do_function_f(grid.PART_TYPE_ARM, 30, 2)
-      grid.do_function_f(grid.PART_TYPE_ARM, 30, 2)
+      calcc.find_part(constants.parts.ARM, 30, 5)
     end)
     ui.button("L30 Head", function()
-      partfind.do_function_f(grid.PART_TYPE_HEAD, 30, 2)
-      grid.do_function_f(grid.PART_TYPE_ARM, 30, 2)
+      calcc.find_part(constants.parts.HEAD, 30, 5)
     end)
     ui.endWindow()
 end
