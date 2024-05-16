@@ -1,5 +1,6 @@
 local maingrid = require "lua.seventhcross.components.maingrid"
 local util = require "lua.seventhcross.windows.gridshared"
+local logger  = require "lua.seventhcross.components.log"
 
 ---@enum MainGridWindowActionType
 local actions = {

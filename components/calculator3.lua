@@ -1,5 +1,6 @@
 local consts = require "lua.seventhcross.constants"
 local grid = require "lua.seventhcross.components.maingrid"
+local logger = require "lua.seventhcross.components.log"
 local calc = {}
 
 

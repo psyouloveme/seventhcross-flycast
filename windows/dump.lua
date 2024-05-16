@@ -9,7 +9,7 @@ end
 
 local function build_dump_window()
   local ui = flycast.ui
-  ui.beginWindow("Tools", 1065, 270, 100, 0)
+  ui.beginWindow("Dump", 1065, 270, 100, 0)
   -- dumping stuff
   ui.text("Dump")
   ui.button("Player", function()

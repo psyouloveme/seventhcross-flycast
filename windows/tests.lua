@@ -1,6 +1,7 @@
 local mem = require "lua.seventhcross.emulator.memory"
 local supergrid = require "lua.seventhcross.components.supergrid"
 local grid  = require "lua.seventhcross.components.grid"
+local logger  = require "lua.seventhcross.components.log"
 
 local function build_test_window()
     local ui = flycast.ui
@@ -18,7 +19,7 @@ local function build_test_window()
         print(mem.read32(0x8c0c72b4 + 4))
     end)
     ui.button("Float 2", function()
-        print("trying float formats")
+      print("trying float formats")
         mem.tests.try_float_formats(0x8c3be40c, "f1")
         mem.tests.try_float_formats(0x8c1e1984, "f2")
         mem.tests.try_float_formats(0x8c1e1990, "f3")

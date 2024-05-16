@@ -1,4 +1,5 @@
 require "string"
+local logger                 = require "lua.seventhcross.components.log"
 local consts                 = require "lua.seventhcross.constants"
 local dump                   = require "lua.seventhcross.components.dump"
 local build_calc_window      = require "lua.seventhcross.windows.calc"
@@ -10,6 +11,7 @@ local build_scoregrid_window = require "lua.seventhcross.windows.scoregrid"
 local build_supergrid_window = require "lua.seventhcross.windows.supergrid"
 local build_test_window      = require "lua.seventhcross.windows.tests"
 local build_unicode_window   = require "lua.seventhcross.windows.unicodetest"
+local build_stat_edit_windows = require "lua.seventhcross.windows.stat_edit"
 
 ---do this dumb workaround to get typing for the global
 ---@type Flycast
@@ -59,6 +61,7 @@ local windows_enabled = {
   maingrid = false;
   memorytable = false;
   scoregrid = false;
+  statedit = true;
   supergrid = false;
   tests = false;
   unicodetest = false;
@@ -92,6 +95,7 @@ local function build_window_controls()
   build_toggle("maingrid", "Main Grid")
   build_toggle("memorytable", "Memory")
   build_toggle("scoregrid", "Score Grid")
+  build_toggle("statedit", "Stat edit")
   build_toggle("supergrid", "Super Grid")
   build_toggle("tests", "Tests")
   build_toggle("unicodetest", "Unicode")
@@ -129,6 +133,9 @@ local function cbOverlay()
   if we.unicodetest then
     build_unicode_window()
   end
+  if we.statedit then
+    build_stat_edit_windows()
+  end
 end
 
 ---Start callback
@@ -137,7 +144,7 @@ local function cbStart()
   print("Game started: " .. s.media)
   print("Game Id: " .. s.gameId)
   print("Display: " .. s.display.width .. "x" .. s.display.height)
-  flycast.emulator.loadState(1)
+  -- flycast.emulator.loadState(1)
 end
 
 ---@type Flycast.Callbacks

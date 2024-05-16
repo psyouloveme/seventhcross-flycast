@@ -1,5 +1,7 @@
 local memory = require("lua.seventhcross.emulator.memory")
 local consts = require("lua.seventhcross.constants")
+local logger = require "lua.seventhcross.components.log"
+
 
 local sg = {}
 -- local grid = {
@@ -79,7 +81,7 @@ end
 
 local function try_float_print_formats(fl, label)
     if fl == nil then
-      print(string.format("%s is nil", label))
+        print(string.format("%s is nil", label))
     else
       print(string.format("%s: print: ", label), fl)
       print(string.format("%s: tostring: ", label), tostring(fl))
@@ -177,13 +179,11 @@ sg.outer_grid = {}
 -- oi
 print("Constants:")
 print(string.format("  consts.sizeof.float: 0x%08x %d", consts.sizeof.float, consts.sizeof.float))
-
 print("Grid props:")
 print(string.format("  grid_props.outer.dimensions.height: 0x%08x %d", grid_props.outer.dimensions.height, grid_props.outer.dimensions.height))
 print(string.format("  grid_props.outer.dimensions.width: 0x%08x %d", grid_props.outer.dimensions.width, grid_props.outer.dimensions.width))
 print(string.format("  grid_props.outer.size.row: 0x%08x %d", grid_props.outer.size.row, grid_props.outer.size.row))
 print(string.format("  grid_props.outer.size.col: 0x%08x %d", grid_props.outer.size.col, grid_props.outer.size.col))
-
 print(string.format("  grid_props.inner.dimensions.height: 0x%08x %d", grid_props.inner.dimensions.height, grid_props.inner.dimensions.height))
 print(string.format("  grid_props.inner.dimensions.width: 0x%08x %d", grid_props.inner.dimensions.width, grid_props.inner.dimensions.width))
 print(string.format("  grid_props.inner.size.row: 0x%08x %d", grid_props.inner.size.row, grid_props.inner.size.row))
