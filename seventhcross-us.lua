@@ -17,11 +17,17 @@ local build_stat_edit_windows = require "lua.seventhcross.windows.stat_edit"
 ---@type Flycast
 _G.flycast = _G.flycast
 
+---@type Flycast.Callbacks
+_G.flycast_callbacks = _G.flycast_callbacks
+
 ---dump type storage to use in dump window
 NEXT_PAUSE_DUMP_TYPE = consts.dump_type.None
+-- TARGET_FPS = 30
 
 ---Meta UI render counter
-local ui_render_count = 0
+-- local ui_render_count = 0;
+-- local vblank_count = 0;
+-- local frame_count = 0;
 
 ---Pause callback
 local function cbPause()
@@ -43,10 +49,7 @@ local function cbLoadState()
   print("State loaded")
 end
 
----VBlank callback
-local function cbVBlank()
---  print("vblank x,y=", flycast.input.getAbsCoordinates(1))
-end
+
 
 ---Resume callback
 local function cbResume()
@@ -138,6 +141,37 @@ local function cbOverlay()
   end
 end
 
+---VBlank callback
+local function cbVBlank()
+  -- if vblank_count % TARGET_FPS == 0 then
+  --   frame_count = frame_count + 1
+  --   vblank_count = 0;
+  -- end
+  -- string.format("vblank: buttons1: %08x", flycast.input.getButtons(1))
+ print(string.format("vblank: buttons1: %08x", flycast.input.getButtons(1)))
+--  print(string.format("vblank: getAxis11: %08x", flycast.input.getAxis(1, 0)))
+ print(string.format("vblank: getAxis11: %08x", flycast.input.getAxis(1, 1)))
+ print(string.format("vblank: getAxis12: %08x", flycast.input.getAxis(1, 2)))
+ print(string.format("vblank: getAxis13: %08x", flycast.input.getAxis(1, 3)))
+ print(string.format("vblank: getAxis14: %08x", flycast.input.getAxis(1, 4)))
+ print(string.format("vblank: getAxis15: %08x", flycast.input.getAxis(1, 5)))
+ print(string.format("vblank: getAxis16: %08x", flycast.input.getAxis(1, 6)))
+
+ print(string.format("vblank: getAxis21: %08x", flycast.input.getAxis(2, 1)))
+ print(string.format("vblank: getAxis22: %08x", flycast.input.getAxis(2, 2)))
+ print(string.format("vblank: getAxis23: %08x", flycast.input.getAxis(2, 3)))
+ print(string.format("vblank: getAxis24: %08x", flycast.input.getAxis(2, 4)))
+ print(string.format("vblank: getAxis25: %08x", flycast.input.getAxis(2, 5)))
+ print(string.format("vblank: getAxis26: %08x", flycast.input.getAxis(2, 6)))
+--  print(string.format("vblank: getAxis21: %08x", flycast.input.getAxis(2, 1)))
+--  print(string.format("vblank: getAxis22: %08x", flycast.input.getAxis(2, 2)))
+--  print(string.format("vblank: getAxis23: %08x", flycast.input.getAxis(2, 3)))
+--  print(string.format("vblank: getAxis24: %08x", flycast.input.getAxis(2, 4)))
+--  print(string.format("vblank: getAxis25: %08x", flycast.input.getAxis(2, 5)))
+--  print(string.format("vblank: getAxis26: %08x", flycast.input.getAxis(2, 6)))
+--  vblank_count = vblank_count + 1;
+end
+
 ---Start callback
 local function cbStart()
   local s = flycast.state
@@ -147,7 +181,6 @@ local function cbStart()
   -- flycast.emulator.loadState(1)
 end
 
----@type Flycast.Callbacks
 flycast_callbacks = {
   start = cbStart,
   pause = cbPause,

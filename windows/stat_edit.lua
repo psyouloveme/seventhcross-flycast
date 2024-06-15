@@ -7,133 +7,189 @@ table.insert(StatGroups, {
   label = "HP Current";
   id = 15;
   address = 0x8c1e19de;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
   label = "HP";
   id = 0;
   address = 0x8c1e19e2;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
   label = "EP Current";
   id = 16;
   address = 0x8c1e19e0;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
   label = "EP";
   id = 1;
   address = 0x8c1e19e4;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
   label = "EVP";
   id = 2;
   address = 0x8c1e19ec;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
   label = "Attack";
   id = 3;
   address = 0x8c1e19f4;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
   label = "EXAttack";
   id = 4;
   address = 0x8c1e19f6;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
   label = "Defense";
   id = 5;
   address = 0x8c1e19f8;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
   label = "Intelligence";
   id = 6;
   address = 0x8c1e19fa;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
   label = "Healing";
   id = 7;
   address = 0x8c1e19fc;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
   label = "Dextarity";
   id = 8;
   address = 0x8c1e19fe;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
   label = "Water";
   id = 9;
   address = 0x8c1e1a00;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
   label = "Protein";
   id = 10;
   address = 0x8c1e1a02;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
   label = "Calcium";
   id = 11;
   address = 0x8c1e1a04;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
   label = "Fiber";
   id = 12;
   address = 0x8c1e1a06;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
-  label = "HardCell";
+  label = "Hard Cell";
   id = 13;
   address = 0x8c1e1a08;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
   type = constants.types.UShort;
-  label = "NeuroBio";
+  label = "Neuro-Bio";
   id = 14;
   address = 0x8c1e1a0a;
-  history = {}
+  history = {};
+  track = true;
+  edit = true;
 });
 table.insert(StatGroups, {
-  type = constants.types.Int;
-  label = "EnemyId";
+  type = constants.types.Float;
+  label = "EnemyFloatOne";
   id = 15;
   address = 0x8c33afe4;
   history = {};
+  track = false;
+  edit = false;
 })
 table.insert(StatGroups, {
-  type = constants.types.Int;
-  label = "EnemyHealth";
+  type = constants.types.Float;
+  label = "EnemyFloatTwo";
   id = 16;
   address = 0x8c33afe8;
   history = {};
+  track = false;
+  edit = false;
+})
+table.insert(StatGroups, {
+  type = constants.types.Float;
+  label = "EnemyFloatThree";
+  id = 17;
+  address = 0x8c33afec;
+  history = {};
+  track = false;
+  edit = false;
+})
+table.insert(StatGroups, {
+  type = constants.types.Short;
+  label = "EnemyShortOne";
+  id = 18;
+  address = 0x8c33aff0;
+  history = {};
+  track = false;
+  edit = false;
 })
 
 local selected_stat = nil;
@@ -233,15 +289,17 @@ local function build_stat_text(index)
   local stat = StatGroups[index]
   flycast.ui.text(stat.label)
   local val = mem.read16(stat.address)
-  if #stat.history > 0 then
-    local old_val = stat.history[#stat.history]
-    if old_val ~= val then
+  if stat.track then
+    if #stat.history > 0 then
+      local old_val = stat.history[#stat.history]
+      if old_val ~= val then
+        table.insert(stat.history, val)
+        table.insert(stat_log, { stat = stat.label, value = val - old_val })
+      end
+    else
       table.insert(stat.history, val)
-      table.insert(stat_log, { stat = stat.label, value = val - old_val })
+      -- table.insert(stat_log, { stat = stat.label, value = val })
     end
-  else
-    table.insert(stat.history, val)
-    -- table.insert(stat_log, { stat = stat.label, value = val })
   end
   flycast.ui.rightText(val)
 end
@@ -250,7 +308,9 @@ local function build_stat_selector()
   local ui = flycast.ui
   ui.beginWindow("Select", stat_select_x, 0, stat_select_width, 0);
   for i, v in ipairs(StatGroups) do
-    build_stat_button(v)
+    if v.edit then
+      build_stat_button(v)
+    end
   end
   ui.endWindow();
 end;
