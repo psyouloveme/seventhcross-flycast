@@ -2,6 +2,6 @@ Flycast scripts for Seventh Cross
 
 In your flycast install make a `lua` folder. 
 
-Go to Settings -> Advanced -> Lua Scripting -> Lua Filename: `lua\seventhcross\seventhcross-us.lua`
+Go to Settings -> Advanced -> Lua Scripting -> Lua Filename: `lua\seventhcross\seventhcross-us.lua`.
 
-Lotta stuff doesn't work yet, sorry.
+There's a meta-window that controls which windows are visible, otherwise the stat display window is open by default. Lotta stuff doesn't work yet, sorry.
